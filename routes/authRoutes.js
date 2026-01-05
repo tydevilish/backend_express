@@ -31,9 +31,9 @@ const pool = require("../config/db");
  *                 type: string
  *               lastname:
  *                 type: string
- *               email:
+ *               sex:
  *                 type: string
- *               phone:
+ *               birthday:
  *                 type: string
  *               address:
  *                 type: string
@@ -43,7 +43,6 @@ const pool = require("../config/db");
  *       400:
  *         description: ข้อมูลไม่ครบ หรือชื่อซ้ำ
  */
-
 router.post("/register", async (req, res) => {
   try {
     const {
@@ -53,8 +52,8 @@ router.post("/register", async (req, res) => {
       username,
       password,
       address,
-      phone,
-      email,
+      sex,
+      birthday,
     } = req.body;
 
     if (!username || !password) {
@@ -62,9 +61,10 @@ router.post("/register", async (req, res) => {
     }
 
     const [userCheck] = await pool.query(
-      "SELECT * FROM tbl_customers WHERE username = ?",
+      "SELECT id FROM tbl_users WHERE username = ?",
       [username]
     );
+
     if (userCheck.length > 0) {
       return res.status(400).json({ message: "ชื่อนี้มีผู้ใช้งานแล้ว" });
     }
@@ -73,7 +73,20 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await pool.query(
-      `INSERT INTO tbl_customers (firstname, fullname, lastname, username, password, address, phone, email, create_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+      `
+      INSERT INTO tbl_users (
+        firstname,
+        fullname,
+        lastname,
+        username,
+        password,
+        address,
+        sex,
+        birthday,
+        create_at
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      `,
       [
         firstname,
         fullname,
@@ -81,14 +94,15 @@ router.post("/register", async (req, res) => {
         username,
         hashedPassword,
         address,
-        phone,
-        email,
+        sex,
+        birthday,
       ]
     );
-    return res.json({ message: "สมัครสมาชิกสำเร็จ" });
+
+    res.json({ message: "สมัครสมาชิกสำเร็จ" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
@@ -127,12 +141,12 @@ router.post("/register", async (req, res) => {
  *       400:
  *         description: Username หรือ Password ไม่ถูกต้อง
  */
-
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
+
     const [rows] = await pool.query(
-      "SELECT * FROM tbl_customers WHERE username = ?",
+      "SELECT * FROM tbl_users WHERE username = ?",
       [username]
     );
 
@@ -148,14 +162,18 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { customer_id: user.customer_id, username: user.username },
+      {
+        id: user.id,
+        username: user.username,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    return res.json({ token: token });
+
+    res.json({ token });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
