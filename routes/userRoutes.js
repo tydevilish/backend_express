@@ -25,21 +25,19 @@ const auth = require("../middleware/auth");
  */
 router.get("/", auth, async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `
-      SELECT 
-        customer_id,
+    const [rows] = await pool.query(`
+      SELECT
+        id,
         firstname,
         fullname,
         lastname,
         username,
         address,
-        phone,
-        email,
+        sex,
+        birthday,
         create_at
       FROM tbl_users
-      `
-    );
+    `);
 
     res.json(rows);
   } catch (err) {
@@ -62,7 +60,7 @@ router.get("/", auth, async (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID ของผู้ใช้งาน (customer_id)
+ *         description: ID ของผู้ใช้งาน
  *     responses:
  *       200:
  *         description: ข้อมูลผู้ใช้งาน
@@ -75,18 +73,18 @@ router.get("/:id", auth, async (req, res) => {
 
     const [rows] = await pool.query(
       `
-      SELECT 
-        customer_id,
+      SELECT
+        id,
         firstname,
         fullname,
         lastname,
         username,
         address,
-        phone,
-        email,
+        sex,
+        birthday,
         create_at
       FROM tbl_users
-      WHERE customer_id = ?
+      WHERE id = ?
       `,
       [id]
     );
@@ -106,10 +104,8 @@ router.get("/:id", auth, async (req, res) => {
  * @swagger
  * /api/users:
  *   post:
- *     summary: เพิ่มผู้ใช้งานใหม่ (Admin Create)
+ *     summary: เพิ่มผู้ใช้งานใหม่ (Register / Admin Create)
  *     tags: [Users]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -133,9 +129,9 @@ router.get("/:id", auth, async (req, res) => {
  *                 type: string
  *               address:
  *                 type: string
- *               phone:
+ *               sex:
  *                 type: string
- *               email:
+ *               birthday:
  *                 type: string
  *     responses:
  *       200:
@@ -143,7 +139,7 @@ router.get("/:id", auth, async (req, res) => {
  *       400:
  *         description: ข้อมูลไม่ครบ หรือ Username ซ้ำ
  */
-router.post("/", auth, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const {
       firstname,
@@ -152,8 +148,8 @@ router.post("/", auth, async (req, res) => {
       username,
       password,
       address,
-      phone,
-      email,
+      sex,
+      birthday,
     } = req.body;
 
     if (!username || !password || !firstname) {
@@ -161,7 +157,7 @@ router.post("/", auth, async (req, res) => {
     }
 
     const [check] = await pool.query(
-      "SELECT customer_id FROM tbl_users WHERE username = ?",
+      "SELECT id FROM tbl_users WHERE username = ?",
       [username]
     );
 
@@ -181,8 +177,8 @@ router.post("/", auth, async (req, res) => {
         username,
         password,
         address,
-        phone,
-        email,
+        sex,
+        birthday,
         create_at
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
@@ -194,8 +190,8 @@ router.post("/", auth, async (req, res) => {
         username,
         hashedPassword,
         address,
-        phone,
-        email,
+        sex,
+        birthday,
       ]
     );
 
@@ -238,9 +234,9 @@ router.post("/", auth, async (req, res) => {
  *                 type: string
  *               address:
  *                 type: string
- *               phone:
+ *               sex:
  *                 type: string
- *               email:
+ *               birthday:
  *                 type: string
  *     responses:
  *       200:
@@ -249,7 +245,7 @@ router.post("/", auth, async (req, res) => {
 router.put("/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstname, fullname, lastname, address, phone, email } = req.body;
+    const { firstname, fullname, lastname, address, sex, birthday } = req.body;
 
     const [result] = await pool.query(
       `
@@ -259,11 +255,11 @@ router.put("/:id", auth, async (req, res) => {
         fullname  = ?,
         lastname  = ?,
         address   = ?,
-        phone     = ?,
-        email     = ?
-      WHERE customer_id = ?
+        sex       = ?,
+        birthday  = ?
+      WHERE id = ?
       `,
-      [firstname, fullname, lastname, address, phone, email, id]
+      [firstname, fullname, lastname, address, sex, birthday, id]
     );
 
     if (result.affectedRows === 0) {
@@ -300,7 +296,7 @@ router.delete("/:id", auth, async (req, res) => {
     const { id } = req.params;
 
     const [result] = await pool.query(
-      "DELETE FROM tbl_users WHERE customer_id = ?",
+      "DELETE FROM tbl_users WHERE id = ?",
       [id]
     );
 
