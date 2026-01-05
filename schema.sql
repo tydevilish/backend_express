@@ -14,21 +14,20 @@ CREATE TABLE IF NOT EXISTS `tbl_customers` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- 2. สร้างตาราง tbl_users
 CREATE TABLE IF NOT EXISTS `tbl_users` (
-  `customer_id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
   `firstname` varchar(20) NOT NULL,
   `fullname` varchar(100) NOT NULL,
   `lastname` varchar(100) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
   `address` text,
-  `phone` varchar(20) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
+  `sex` varchar(10) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
   `create_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`customer_id`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 -- 3. สร้างตาราง tbl_restaurants
 CREATE TABLE IF NOT EXISTS `tbl_restaurants` (

@@ -12,7 +12,7 @@ const options = {
     },
     servers: [
       {
-        url: "/", // ✅ ใช้ Relative Path (แนะนำสุด จะใช้ได้ทั้ง dev และ prod)
+        url: "/",
         description: "Current Server",
       },
       {
