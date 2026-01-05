@@ -34,7 +34,7 @@ const pool = require("../config/db");
  *               sex:
  *                 type: string
  *               birthday:
- *                 type: string
+ *                 type: yyyy-MM-dd
  *               address:
  *                 type: string
  *     responses:
